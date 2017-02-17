@@ -1,0 +1,6 @@
+(* hw #1 solution *)
+
+(* fun is_older(int*int*int, int*int*int) -> bool *)
+fun is_older(date1: int*int*int, date2: int*int*int) =
+  #1 date1 < #2 date2 orelse #2 date1 < #2 date2 orelse #3 date1 < #3 date2
+								      

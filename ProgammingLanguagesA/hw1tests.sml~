@@ -1,0 +1,9 @@
+use "hw1.sml"
+
+val test1 = is_older((1,1,1),(2,1,1)) = true
+val test2 = is_older((1,1,1),(1,2,1)) = true
+val test3 = is_older((1,1,1),(1,1,2)) = true
+val test4 = is_older((1,1,1),(1,1,1)) = false
+val test5 = is_older((1,1,2),(1,1,1)) = false
+val test6 = is_older((1,2,1),(1,1,1)) = false
+val test5 = is_older((2,1,1),(1,1,1)) = false
