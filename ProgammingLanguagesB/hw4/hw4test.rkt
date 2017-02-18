@@ -32,17 +32,21 @@
       (check-equal? (string-append-map (list "a" "b" "c") "x") '("ax" "bx" "cx") "string-append-map simple test")
       (check-equal? (string-append-map null "x") null "string-append-map empty test")
    
-   ; list-nth-mod test
-   ;(check-equal? (list-nth-mod (list 0 1 2 3 4) 2) 2 "list-nth-mod test")
+   ; list-nth-mod tests
+   (check-equal? (list-nth-mod (list 0 1 2 3 4) 1) 1 "list-nth-mod test 1 ")
+   (check-equal? (list-nth-mod (list 0 1 2 3 4) 2) 2 "list-nth-mod test 2 ")
+   (check-equal? (list-nth-mod (list 0 1 2 3 4) 8) 3 "list-nth-mod test 3 ")
+   (check-equal? (list-nth-mod (list 0 1 2 3 4) 0) 0 "list-nth-mod test 4 ")
    
    ; stream-for-n-steps test
-   ;(check-equal? (stream-for-n-steps ones 2) (list 1 1) "stream-for-n-steps test")
+   (check-equal? (stream-for-n-steps ones 2) (list 1 1) "stream-for-n-steps test")
    
    ; funny-number-stream test
-   ;(check-equal? (stream-for-n-steps funny-number-stream 16) (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
+   (check-equal? (stream-for-n-steps funny-number-stream 16) (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
    
-   ; dan-then-dog test
-   ;(check-equal? (stream-for-n-steps dan-then-dog 1) (list "dan.jpg") "dan-then-dog test")
+   ; dan-then-dog tests
+   (check-equal? (stream-for-n-steps dan-then-dog 1) (list "dan.jpg") "dan-then-dog test")
+   (check-equal? (stream-for-n-steps dan-then-dog 5) (list "dan.jpg" "dog.jpg" "dan.jpg" "dog.jpg" "dan.jpg") "dan-then-dog test long")
    
    ; stream-add-zero test
    ;(check-equal? (stream-for-n-steps (stream-add-zero ones) 1) (list (cons 0 1)) "stream-add-zero test")
