@@ -68,9 +68,16 @@
 
  (define (cached-assoc xs n)
    (letrec ([pos 0]
-            [cache (make-vector n '(cons #f #f))]
+            [cache (make-vector n '#f)]
+            [get-from-cache (lambda(v p)
+                              (if (= p n)
+                                  #f
+                                  (let ([e (vector-ref cache p)])
+                                    (if (and e (equal? (car e) v))
+                                        e
+                                        (get-from-cache v (+ p 1))))))]
             [f (lambda (v)
-                 (let ([r (assoc v (vector->list cache))])
+                 (let ([r (get-from-cache v 0)])
                    (if r
                        r
                        (let ([fr (assoc v xs)])
