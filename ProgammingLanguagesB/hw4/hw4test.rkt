@@ -13,6 +13,11 @@
 (define ones (lambda () (cons 1 ones)))
 (define a 2)
 
+(define pair-stream
+  (letrec ([f (lambda(x) (cons (cons x x)
+                               (lambda() (f (+ x 1)))))])
+    (lambda () (f 1))))
+
 (define tests
   (test-suite
    "Sample tests for Assignment 4"
@@ -22,7 +27,6 @@
    (check-equal? (sequence -5 5 3) (list -5 -2 1 4) "Sequence test with negatives")
    (check-equal? (sequence 0 5 6) (list 0) "Sequence test just low returned")
    (check-equal? (sequence 6 5 1) null "Sequence test empty")
-
    
    ; string-append-map tests
       (check-equal? (string-append-map 
@@ -54,17 +58,20 @@
    (check-equal? (stream-for-n-steps (stream-add-zero dan-then-dog) 3) (list (cons 0 "dan.jpg")(cons 0 "dog.jpg")(cons 0 "dan.jpg")) "stream-add-zero test dog")
    
    ; cycle-lists test
-   ;(check-equal? (stream-for-n-steps (cycle-lists (list 1 2 3) (list "a" "b")) 3) (list (cons 1 "a") (cons 2 "b") (cons 3 "a")) 
-   ;              "cycle-lists test")
+   (check-equal? (stream-for-n-steps (cycle-lists (list 1 2 3) (list "a" "b")) 3) (list (cons 1 "a") (cons 2 "b") (cons 3 "a")) 
+                 "cycle-lists test")
    
-   ; vector-assoc test
-   ;(check-equal? (vector-assoc 4 (vector (cons 2 1) (cons 3 1) (cons 4 1) (cons 5 1))) (cons 4 1) "vector-assoc test")
+   ; vector-assoc tests
+   (check-equal? (vector-assoc 4 (vector (cons 2 1) (cons 3 1) (cons 4 1) (cons 5 1))) (cons 4 1) "vector-assoc test")
+   (check-equal? (vector-assoc 6 (vector (cons 2 1) (cons 3 1) (cons 4 1) (cons 5 1))) #f "vector-assoc test false")
+   (check-equal? (vector-assoc 6 (vector "a" (cons 3 1) 2 (cons 5 1) (cons 6 1) (cons 6 7))) (cons 6 1) "vector-assoc test complicated")
+   (check-equal? (vector-assoc 6 (vector "a" (list 6 5 4) (cons 3 1) 2 (cons 5 1) (cons 6 1) (cons 6 7))) (list 6 5 4) "vector-assoc test list as pair")
    
    ; cached-assoc tests
-   ;(check-equal? ((cached-assoc (list (cons 1 2) (cons 3 4)) 3) 3) (cons 3 4) "cached-assoc test")
+   (check-equal? ((cached-assoc (list (cons 1 2) (cons 3 4)) 3) 3) (cons 3 4) "cached-assoc test")
    
    ; while-less test
-   ;(check-equal? (while-less 7 do (begin (set! a (+ a 1)) a)) #t "while-less test")
+   (check-equal? (while-less 7 do (begin (set! a (+ a 1)) a)) #t "while-less test")
    
    ))
 
