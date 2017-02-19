@@ -49,7 +49,9 @@
    (check-equal? (stream-for-n-steps dan-then-dog 5) (list "dan.jpg" "dog.jpg" "dan.jpg" "dog.jpg" "dan.jpg") "dan-then-dog test long")
    
    ; stream-add-zero test
-   ;(check-equal? (stream-for-n-steps (stream-add-zero ones) 1) (list (cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero ones) 1) (list (cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero ones) 3) (list (cons 0 1)(cons 0 1)(cons 0 1)) "stream-add-zero test longer")
+   (check-equal? (stream-for-n-steps (stream-add-zero dan-then-dog) 3) (list (cons 0 "dan.jpg")(cons 0 "dog.jpg")(cons 0 "dan.jpg")) "stream-add-zero test dog")
    
    ; cycle-lists test
    ;(check-equal? (stream-for-n-steps (cycle-lists (list 1 2 3) (list "a" "b")) 3) (list (cons 1 "a") (cons 2 "b") (cons 3 "a")) 

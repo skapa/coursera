@@ -38,6 +38,13 @@
                                                  "dan.jpg")))))])
     (lambda() (f "dan.jpg"))))
 
+(define (stream-add-zero s)
+  (letrec ([f (lambda(s) (cons (cons 0 (car (s))) (lambda () (f (cdr (s))))))])
+           (lambda() (f s))))
+
+
+
+
 
 
 
