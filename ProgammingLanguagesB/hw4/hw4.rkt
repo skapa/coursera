@@ -68,14 +68,14 @@
 
  (define (cached-assoc xs n)
    (letrec ([pos 0]
-            [cache (make-vector n '#f)]
+            [cache (make-vector n #f)]
             [get-from-cache (lambda(v p)
-                              (if (= p n)
+                              (if (= p n) ; current position equals cache size, no more cells to check
                                   #f
                                   (let ([e (vector-ref cache p)])
-                                    (if (and e (equal? (car e) v))
-                                        e
-                                        (get-from-cache v (+ p 1))))))]
+                                    (cond [(not e) #f] ; found cell in cache that is not filled yet, no need to check next cells
+                                          [(equal? (car e) v) e]
+                                          [#t (get-from-cache v (+ p 1))]))))]
             [f (lambda (v)
                  (let ([r (get-from-cache v 0)])
                    (if r
