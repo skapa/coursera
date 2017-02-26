@@ -35,25 +35,30 @@
    ;; tests if ifgreater returns (int 2)
    (check-equal? (eval-exp (ifgreater (int 3) (int 4) (int 3) (int 2))) (int 2) "ifgreater test")
    (check-equal? (eval-under-env (ifgreater (int 3) (int 1) (var "a") (int 3)) (list (cons "a" (int 10)))) (int 10) "ifgreater test with var")
-#|   
+   
    ;; mlet test
    (check-equal? (eval-exp (mlet "x" (int 1) (add (int 5) (var "x")))) (int 6) "mlet test")
+   (check-equal? (eval-exp (mlet "x" (mlet "y" (int 4) (add (int 1) (var "y"))) (add (int 5) (var "x")))) (int 10) "mlet test nested")
    
    ;; call test
    (check-equal? (eval-exp (call (closure '() (fun #f "x" (add (var "x") (int 7)))) (int 1))) (int 8) "call test")
+   ;(check-equal? (eval-exp (call (closure '() (fun "until10" "x" (ifgreater (var "x") (int 10) (var "x") (call (begin (print "until10") "until10") (add (int 1) (var "x")))))) (int 0))) (int 10) "call test recursive")
+   ;(check-equal? (eval-exp (call (closure '((cons(fun #f "x" (add (var "x") (int 7))))) (fun "f" "x" (add (var "x") (call (closure '() (fun #f "x" (int 1))) int 7)))) (int 1))) (int 8) "call test")
    
    ;;snd test
    (check-equal? (eval-exp (snd (apair (int 1) (int 2)))) (int 2) "snd test")
+   (check-equal? (eval-exp (fst (apair (call (closure '() (fun #f "x" (add (var "x") (int 7)))) (int 1)) (int 2)))) (int 8) "fst test with call inside")
    
    ;; isaunit test
    (check-equal? (eval-exp (isaunit (closure '() (fun #f "x" (aunit))))) (int 0) "isaunit test")
    
    ;; mlet* test
    (check-equal? (eval-exp (mlet* (list (cons "x" (int 10))) (var "x"))) (int 10) "mlet* test")
+   (check-equal? (eval-exp (mlet* (list (cons "a" (int 1)) (cons "b" (int 2))) (add (var "a") (var "b")))) (int 3) "mlet* test bigger")
    
    ;; ifeq test
    (check-equal? (eval-exp (ifeq (int 1) (int 2) (int 3) (int 4))) (int 4) "ifeq test")
-   
+#|   
    ;; mupl-map test
    (check-equal? (eval-exp (call (call mupl-map (fun #f "x" (add (var "x") (int 7)))) (apair (int 1) (aunit)))) 
                  (apair (int 8) (aunit)) "mupl-map test")

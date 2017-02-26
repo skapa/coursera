@@ -74,17 +74,36 @@
          (let ([var (mlet-var e)]
                [v1 (eval-under-env (mlet-e e) env)])
            (if (string? var)
-               (eval-under-env e
-;(struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body)
-
-               
-        [(isaunit? e)
-         (begin
-           (print "a")
-                      
-         (if (aunit? e) 1 0))]
-        ;[(mlet? e)
-        ; (let ([
+               (eval-under-env (mlet-body e) (cons (cons var v1) env))
+               (error "MUPL variable name has to be string")))]
+        [(call? e)
+         (let ([funexp (call-funexp e)]
+               [actual (call-actual e)])
+           (if (closure? funexp)
+               (let ([f (closure-fun funexp)]
+                     [fenv (closure-env funexp)])
+                 (eval-under-env (fun-body f)
+                                 (cons (cons (fun-formal f) (eval-under-env actual env))
+                                       (if (fun-nameopt f)
+                                           (cons (cons (fun-nameopt f) funexp) fenv)
+                                           fenv))))
+               (error "MUPL call funexp has to be closure")))]
+        [(apair? e)
+         (apair (eval-under-env (apair-e1 e) env)
+                (eval-under-env (apair-e2 e) env))]
+        [(fst? e)
+         (let ([p (eval-under-env (fst-e e) env)])
+           (if (apair? p)
+               (apair-e1 p)
+               (error "MUPL fst evaluated on not pair")))]
+        [(snd? e)
+         (let ([p (eval-under-env (snd-e e) env)])
+           (if (apair? p)
+               (apair-e2 p)
+               (error "MUPL snd evaluated on not pair")))]
+        [(isaunit? e) 
+         (if (aunit? (eval-under-env (isaunit-e e) env)) (int 1) (int 0))]
+        [(aunit? e) e]
         [(closure? e) e]
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
@@ -96,15 +115,34 @@
 
 (define (ifaunit e1 e2 e3) (if (aunit? e1) e2 e3))
 
-;(define (mlet* lstlst e2)
-;  (
+(define (mlet* lstlst e2)
+  (if (null? lstlst)
+      e2
+      (let ([s (car (car lstlst))]
+            [e (cdr (car lstlst))])
+        (mlet s e (mlet* (cdr lstlst) e2)))))
+        
 
-(define (ifeq e1 e2 e3 e4) "CHANGE")
+(define (ifeq e1 e2 e3 e4)
+  (mlet "_x" e1
+        (mlet "_y" e2
+              (ifgreater (var "_x") (var "_y")
+                         e4
+                         (ifgreater (var "_y") (var "_x")
+                                    e4
+                                    e3)))))
+                      
+              
 
 ;; Problem 4
 
-(define mupl-map "CHANGE")
-
+(define (mupl-map f)
+  (if (fun? f)
+      (print "je to fcia")
+      (print "nie je")))
+        
+;(struct fun  (nameopt formal body)
+   
 (define mupl-mapAddN 
   (mlet "map" mupl-map
         "CHANGE (notice map is now in MUPL scope)"))
