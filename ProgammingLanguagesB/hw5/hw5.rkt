@@ -113,7 +113,7 @@
         
 ;; Problem 3
 
-(define (ifaunit e1 e2 e3) (if (aunit? e1) e2 e3))
+(define (ifaunit e1 e2 e3) (if (equal? (isaunit e1)(int 1)) e2 e3))
 
 (define (mlet* lstlst e2)
   (if (null? lstlst)
@@ -122,7 +122,6 @@
             [e (cdr (car lstlst))])
         (mlet s e (mlet* (cdr lstlst) e2)))))
         
-
 (define (ifeq e1 e2 e3 e4)
   (mlet "_x" e1
         (mlet "_y" e2
@@ -131,19 +130,18 @@
                          (ifgreater (var "_y") (var "_x")
                                     e4
                                     e3)))))
-                      
-              
 
 ;; Problem 4
 
 (define mupl-map
-  (fun #f "f" (fun "g" "y" (var "x"))))
-        
-;(struct fun  (nameopt formal body)
-   
+  (fun #f "f" (fun "r" "l"
+                   (ifeq (isaunit (var "l")) (int 1)
+                       (var "l")
+                       (apair (call (var "f") (fst (var "l"))) (call (var "r") (snd (var "l"))))))))
+
 (define mupl-mapAddN 
   (mlet "map" mupl-map
-        "CHANGE (notice map is now in MUPL scope)"))
+        (fun #f "a" (call (var "map") (fun #f "x" (add (var "x") (var "a"))) ))))
 
 ;; Challenge Problem
 
@@ -152,6 +150,15 @@
 ;; We will test this function directly, so it must do
 ;; as described in the assignment
 (define (compute-free-vars e) "CHANGE")
+#|
+(define (compute-free-vars e)
+  (cond [(var? e) (compute-free-vars (envlookup env (var-string e)))]
+        [(mlet? e) 
+  (if (fun? e)
+      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e)
+                     ())
+      (
+|#
 
 ;; Do NOT share code with eval-under-env because that will make
 ;; auto-grading and peer assessment more difficult, so
