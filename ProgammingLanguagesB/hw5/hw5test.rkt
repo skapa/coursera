@@ -42,8 +42,7 @@
    
    ;; call test
    (check-equal? (eval-exp (call (closure '() (fun #f "x" (add (var "x") (int 7)))) (int 1))) (int 8) "call test")
-   ;(check-equal? (eval-exp (call (closure '() (fun "until10" "x" (ifgreater (var "x") (int 10) (var "x") (call (begin (print "until10") "until10") (add (int 1) (var "x")))))) (int 0))) (int 10) "call test recursive")
-   ;(check-equal? (eval-exp (call (closure '((cons(fun #f "x" (add (var "x") (int 7))))) (fun "f" "x" (add (var "x") (call (closure '() (fun #f "x" (int 1))) int 7)))) (int 1))) (int 8) "call test")
+   (check-equal? (eval-exp (call (closure '() (fun "until10" "x" (ifgreater (var "x") (int 20) (var "x") (call (var "until10") (add (int 1) (var "x")))))) (int 0))) (int 21) "call test recursive")
    
    ;;snd test
    (check-equal? (eval-exp (snd (apair (int 1) (int 2)))) (int 2) "snd test")
@@ -58,11 +57,11 @@
    
    ;; ifeq test
    (check-equal? (eval-exp (ifeq (int 1) (int 2) (int 3) (int 4))) (int 4) "ifeq test")
-#|   
+   
    ;; mupl-map test
    (check-equal? (eval-exp (call (call mupl-map (fun #f "x" (add (var "x") (int 7)))) (apair (int 1) (aunit)))) 
                  (apair (int 8) (aunit)) "mupl-map test")
-
+#|
    ;; problems 1, 2, and 4 combined test
    (check-equal? (mupllist->racketlist
    (eval-exp (call (call mupl-mapAddN (int 7))

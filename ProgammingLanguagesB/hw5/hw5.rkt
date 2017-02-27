@@ -77,15 +77,15 @@
                (eval-under-env (mlet-body e) (cons (cons var v1) env))
                (error "MUPL variable name has to be string")))]
         [(call? e)
-         (let ([funexp (call-funexp e)]
-               [actual (call-actual e)])
-           (if (closure? funexp)
-               (let ([f (closure-fun funexp)]
-                     [fenv (closure-env funexp)])
+         (let ([clsr (eval-under-env (call-funexp e) env)]
+               [param (eval-under-env (call-actual e) env)])
+           (if (closure? clsr)
+               (let ([f (closure-fun clsr)]
+                     [fenv (closure-env clsr)])
                  (eval-under-env (fun-body f)
-                                 (cons (cons (fun-formal f) (eval-under-env actual env))
+                                 (cons (cons (fun-formal f) param)
                                        (if (fun-nameopt f)
-                                           (cons (cons (fun-nameopt f) funexp) fenv)
+                                           (cons (cons (fun-nameopt f) clsr) fenv)
                                            fenv))))
                (error "MUPL call funexp has to be closure")))]
         [(apair? e)
@@ -136,10 +136,8 @@
 
 ;; Problem 4
 
-(define (mupl-map f)
-  (if (fun? f)
-      (print "je to fcia")
-      (print "nie je")))
+(define mupl-map
+  (fun #f "f" (fun "g" "y" (var "x"))))
         
 ;(struct fun  (nameopt formal body)
    
