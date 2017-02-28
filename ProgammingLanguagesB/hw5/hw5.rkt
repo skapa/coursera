@@ -113,7 +113,7 @@
         
 ;; Problem 3
 
-(define (ifaunit e1 e2 e3) (if (equal? (isaunit e1)(int 1)) e2 e3))
+(define (ifaunit e1 e2 e3) (ifgreater (isaunit e1) (int 0) e2 e3))
 
 (define (mlet* lstlst e2)
   (if (null? lstlst)
@@ -149,21 +149,99 @@
 
 ;; We will test this function directly, so it must do
 ;; as described in the assignment
-(define (compute-free-vars e) "CHANGE")
+;(define (compute-free-vars e) "CHANGE")
+
 #|
 (define (compute-free-vars e)
-  (cond [(var? e) (compute-free-vars (envlookup env (var-string e)))]
-        [(mlet? e) 
+  (letrec ([h (lambda (e s)
+    (let (ei (eval-under-env-c e))
+      (cond [(var? ei) (set-add s (var-string ei))]
+            ;[(fun-challenge? ei) (aunit)]
+            [(mlet? ei)(h ei s)]
+            [(call? ei)(h ei s)])))]))
+            
   (if (fun? e)
-      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e)
-                     ())
-      (
+      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h e (set)))
+      (set)))
 |#
+(define (compute-free-vars e)
+  (letrec ([h (lambda (e s)
+                (let ([ei (eval-under-env-c e null)])
+                  (cond [(var? ei) (set-add s (var-string ei))]
+                        ;[(fun-challenge? ei) (aunit)]
+                        [(mlet? ei)(h ei s)]
+                        [(call? ei)(h ei s)])))])
+                
+            
+  (if (fun? e)
+      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h (fun-body e) (set)))
+      (set))))
+
+
 
 ;; Do NOT share code with eval-under-env because that will make
 ;; auto-grading and peer assessment more difficult, so
 ;; copy most of your interpreter here and make minor changes
-(define (eval-under-env-c e env) "CHANGE")
+(define (eval-under-env-c e env)
+  (cond [(var? e) 
+         (envlookup env (var-string e))]
+        [(add? e) 
+         (let ([v1 (eval-under-env-c (add-e1 e) env)]
+               [v2 (eval-under-env-c (add-e2 e) env)])
+           (if (and (int? v1)
+                    (int? v2))
+               (int (+ (int-num v1) 
+                       (int-num v2)))
+               (error "MUPL addition applied to non-number")))]
+        ;; CHANGE add more cases here
+        [(int? e) e]
+        [(fun-challenge? e)
+         (closure (filter (lambda (v) (set-member? (fun-challenge-freevars e) (car v))) env) e)]
+        [(ifgreater? e)
+         (let ([v1 (eval-under-env-c (ifgreater-e1 e) env)]
+               [v2 (eval-under-env-c (ifgreater-e2 e) env)])
+           (if (and (int? v1)
+                    (int? v2))
+               (if (> (int-num v1) (int-num v2))
+                   (eval-under-env-c (ifgreater-e3 e) env)
+                   (eval-under-env-c (ifgreater-e4 e) env))
+               (error "MUPL comparison applied to non-number")))]
+        [(mlet? e)
+         (let ([var (mlet-var e)]
+               [v1 (eval-under-env-c (mlet-e e) env)])
+           (if (string? var)
+               (eval-under-env-c (mlet-body e) (cons (cons var v1) env))
+               (error "MUPL variable name has to be string")))]
+        [(call? e)
+         (let ([clsr (eval-under-env-c (call-funexp e) env)]
+               [param (eval-under-env-c (call-actual e) env)])
+           (if (closure? clsr)
+               (let ([f (closure-fun clsr)]
+                     [fenv (closure-env clsr)])
+                 (eval-under-env-c (fun-body f)
+                                 (cons (cons (fun-formal f) param)
+                                       (if (fun-nameopt f)
+                                           (cons (cons (fun-nameopt f) clsr) fenv)
+                                           fenv))))
+               (error "MUPL call funexp has to be closure")))]
+        [(apair? e)
+         (apair (eval-under-env-c (apair-e1 e) env)
+                (eval-under-env-c (apair-e2 e) env))]
+        [(fst? e)
+         (let ([p (eval-under-env-c (fst-e e) env)])
+           (if (apair? p)
+               (apair-e1 p)
+               (error "MUPL fst evaluated on not pair")))]
+        [(snd? e)
+         (let ([p (eval-under-env-c (snd-e e) env)])
+           (if (apair? p)
+               (apair-e2 p)
+               (error "MUPL snd evaluated on not pair")))]
+        [(isaunit? e) 
+         (if (aunit? (eval-under-env-c (isaunit-e e) env)) (int 1) (int 0))]
+        [(aunit? e) e]
+        [(closure? e) e]
+        [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change this
 (define (eval-exp-c e)
