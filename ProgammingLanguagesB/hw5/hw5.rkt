@@ -149,34 +149,33 @@
 
 ;; We will test this function directly, so it must do
 ;; as described in the assignment
-;(define (compute-free-vars e) "CHANGE")
-
-#|
 (define (compute-free-vars e)
-  (letrec ([h (lambda (e s)
-    (let (ei (eval-under-env-c e))
-      (cond [(var? ei) (set-add s (var-string ei))]
-            ;[(fun-challenge? ei) (aunit)]
-            [(mlet? ei)(h ei s)]
-            [(call? ei)(h ei s)])))]))
-            
-  (if (fun? e)
-      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h e (set)))
-      (set)))
-|#
-(define (compute-free-vars e)
-  (letrec ([h (lambda (e s)
-                (let ([ei (eval-under-env-c e null)])
-                  (cond [(var? ei) (set-add s (var-string ei))]
-                        ;[(fun-challenge? ei) (aunit)]
-                        [(mlet? ei)(h ei s)]
-                        [(call? ei)(h ei s)])))])
-                
-            
-  (if (fun? e)
-      (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h (fun-body e) (set)))
-      (set))))
+  (letrec ([h (lambda (e)
+                (cond [(var? e) (set (var-string e))]
+                      [(mlet? e) (set-remove (set-union (h (mlet-e e)) (h (mlet-body e))) (mlet-var e))]
+                      [(call? e)(set-union (h (call-funexp e)) (h (call-actual e)))]
+                      [(add? e)(set-union (h (add-e1 e)) (h (add-e2 e)))]
+                      [(ifgreater? e) (set-union (h (ifgreater-e1 e)) (h (ifgreater-e2 e)) (h (ifgreater-e3 e)) (h (ifgreater-e4 e)))]
+                      [(apair? e)(set-union (h (apair-e1 e)) (h (apair-e2 e)))]
+                      [(fst? e)(h (fst-e e))]
+                      [(snd? e)(h (snd-e e))]
+                      [(isaunit? e)(h (isaunit-e e))]
+                      [(fun? e)(set-remove (set-remove (h (fun-body e)) (fun-formal e)) (fun-nameopt e))]
+                      ;[(closure? e) (set-subtract (h (closure-fun e)) (list->set (map (lambda (x) (car x))(closure-env e))))]
+                      [(closure? e) (h (closure-fun e))]
+                      [#t (set)]))])
 
+    (cond [(mlet? e) (mlet (mlet-var e) (compute-free-vars (mlet-e e)) (compute-free-vars (mlet-body e)))]
+          [(call? e) (call (compute-free-vars (call-funexp e)) (compute-free-vars (call-actual e)))]
+          [(add? e) (add (compute-free-vars (add-e1 e)) (compute-free-vars  (add-e2 e)))]
+          [(ifgreater? e) (ifgreater (compute-free-vars  (ifgreater-e1 e)) (compute-free-vars  (ifgreater-e2 e)) (compute-free-vars (ifgreater-e3 e)) (compute-free-vars (ifgreater-e4 e)))]
+          [(apair? e) (apair (compute-free-vars (apair-e1 e)) (compute-free-vars (apair-e2 e)))]
+          [(fst? e)(fst (compute-free-vars (fst-e e)))]
+          [(snd? e)(snd (compute-free-vars (snd-e e)))]
+          [(isaunit? e) (isaunit (compute-free-vars (isaunit-e e)))]
+          [(fun? e)(fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h e))]
+          [(closure? e) (closure (closure-env e) (compute-free-vars (closure-fun e)))]
+          [#t e])))
 
 
 ;; Do NOT share code with eval-under-env because that will make
