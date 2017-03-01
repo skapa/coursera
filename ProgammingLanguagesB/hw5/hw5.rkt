@@ -173,7 +173,8 @@
           [(fst? e)(fst (compute-free-vars (fst-e e)))]
           [(snd? e)(snd (compute-free-vars (snd-e e)))]
           [(isaunit? e) (isaunit (compute-free-vars (isaunit-e e)))]
-          [(fun? e)(fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h e))]
+          [(fun? e)(fun-challenge (fun-nameopt e) (fun-formal e) (compute-free-vars (fun-body e)) (h e))]
+          ;[(fun? e)(fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (h e))]
           [(closure? e) (closure (closure-env e) (compute-free-vars (closure-fun e)))]
           [#t e])))
 
@@ -217,10 +218,10 @@
            (if (closure? clsr)
                (let ([f (closure-fun clsr)]
                      [fenv (closure-env clsr)])
-                 (eval-under-env-c (fun-body f)
-                                 (cons (cons (fun-formal f) param)
-                                       (if (fun-nameopt f)
-                                           (cons (cons (fun-nameopt f) clsr) fenv)
+                 (eval-under-env-c (fun-challenge-body f)
+                                 (cons (cons (fun-challenge-formal f) param)
+                                       (if (fun-challenge-nameopt f)
+                                           (cons (cons (fun-challenge-nameopt f) clsr) fenv)
                                            fenv))))
                (error "MUPL call funexp has to be closure")))]
         [(apair? e)
